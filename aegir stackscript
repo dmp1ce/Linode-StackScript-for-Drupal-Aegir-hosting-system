@@ -8,7 +8,7 @@ source <ssinclude StackScriptID="1">
 
 function aegir_install {
 	# install required packages
-	apt-get install apache2 php5 php5-cli php5-mysql mysql-server postfix sudo git-core unzip curl
+	apt-get -y install apache2 php5 php5-cli php5-mysql mysql-server postfix sudo git-core unzip curl
 	
 	# create aegir user
 	adduser --system --group --home /var/aegir aegir
@@ -16,7 +16,7 @@ function aegir_install {
 
 	# link aegir apache.conf into apache2/conf.d directory
 	ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
-
+-y
 	# Create the aegir database
 	mysql_create_database "$DB_PASSWORD" aegir;
 	# Grant aegir user access to aegir database
@@ -29,20 +29,17 @@ function aegir_install {
 	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6'
 	su -s /bin/sh aegir -c "sh install.sh.txt $AEGIR_HOSTNAME"
-	exit # return back to root user
 
 	# add aegir user to the sudoers file
-	sed '
-	/%admin ALL=(ALL) ALL/ a\
-	aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
-	'
+	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
+aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 
 	# create aegir_root superuser and grant ALL privileges
 	mysql_create_user "$DB_PASSWORD" "aegir_root" "$AEGIR_ROOT_PASSWORD"
 	mysql_grant_user "$DB_PASSWORD" "aegir_root" "*"
 
 	# enable cron tab for hosting service 
-	# Need to get the hostmaster path and use it here to run the drush commands
+	# Can this script be run before Drupal setup?
 	# su -s /bin/sh aegir
 	# php /var/aegir/drush/drush.php --uri=http://aegir.$AEGIR_HOSTNAME.com hosting_setup
 
