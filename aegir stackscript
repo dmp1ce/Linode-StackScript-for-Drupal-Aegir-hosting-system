@@ -1,0 +1,61 @@
+#!/bin/bash
+# <UDF name="db_password" Label="MySQL root Password" />
+# <UDF name="aegir_password" Label="MySQL aegir's Password" example="Password for MySQL aegir user" />
+# <UDF name="aegir_root_password" Label="MySQL aegir_root's Password" example="Password for MySQL aegir_root user" />
+# <UDF name="aegir_hostname" Label="Aegir hostname" example="Example aegir.example.com" />
+
+source <ssinclude StackScriptID="1">
+
+function aegir_install {
+	# install required packages
+	apt-get install apache2 php5 php5-cli php5-mysql mysql-server postfix sudo git-core unzip curl
+	
+	# create aegir user
+	adduser --system --group --home /var/aegir aegir
+	adduser aegir www-data    #make aegir a user of group www-data
+
+	# link aegir apache.conf into apache2/conf.d directory
+	ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
+
+	# Create the aegir database
+	mysql_create_database "$DB_PASSWORD" aegir;
+	# Grant aegir user access to aegir database
+	echo GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON aegir.* TO 'aegir'@'localhost' IDENTIFIED BY '$AEGIR_PASSWORD'; | mysql -u root -p$DB_PASSWORD
+	
+	
+
+	# Get the aegir setup script and run it
+	cd /tmp
+	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
+	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6'
+	su -s /bin/sh aegir -c "sh install.sh.txt $AEGIR_HOSTNAME"
+	exit # return back to root user
+
+	# add aegir user to the sudoers file
+	sed '
+	/%admin ALL=(ALL) ALL/ a\
+	aegir ALL=NOPASSWD: /usr/sbin/apache2ctl
+	'
+
+	# create aegir_root superuser and grant ALL privileges
+	mysql_create_user "$DB_PASSWORD" "aegir_root" "$AEGIR_ROOT_PASSWORD"
+	mysql_grant_user "$DB_PASSWORD" "aegir_root" "*"
+
+	# enable cron tab for hosting service 
+	# Need to get the hostmaster path and use it here to run the drush commands
+	# su -s /bin/sh aegir
+	# php /var/aegir/drush/drush.php --uri=http://aegir.$AEGIR_HOSTNAME.com hosting_setup
+
+	# enable apache mode rewrite
+	a2enmod rewrite
+	# mark apache to restart                                                         
+        touch /tmp/restart-apache2
+}
+
+system_update
+postfix_install_loopback_only
+mysql_install "$DB_PASSWORD" && mysql_tune 40
+php_install_with_apache && php_tune
+goodstuff
+aegir_install
+restartServices
