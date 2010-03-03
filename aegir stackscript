@@ -16,14 +16,12 @@ function aegir_install {
 
 	# link aegir apache.conf into apache2/conf.d directory
 	ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
--y
+
 	# Create the aegir database
 	mysql_create_database "$DB_PASSWORD" aegir;
 	# Grant aegir user access to aegir database
 	echo "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON aegir.* TO 'aegir'@'localhost' IDENTIFIED BY '$AEGIR_PASSWORD';" | mysql -u root -p$DB_PASSWORD
 	
-	
-
 	# Get the aegir setup script and run it
 	cd /tmp
 	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
