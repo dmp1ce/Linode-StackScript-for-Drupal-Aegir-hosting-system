@@ -26,15 +26,14 @@ function aegir_install {
 	cd /tmp
 	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6'
-	su -s /bin/sh aegir -c "sh install.sh.txt $AEGIR_HOSTNAME"
+	su -s /bin/sh aegir -c "sh install.sh.txt -y $AEGIR_HOSTNAME"
 
 	# add aegir user to the sudoers file
 	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
 aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 
 	# create aegir_root superuser and grant ALL privileges
-	mysql_create_user "$DB_PASSWORD" "aegir_root" "$AEGIR_ROOT_PASSWORD"
-	mysql_grant_user "$DB_PASSWORD" "aegir_root" "*"
+        echo "GRANT ALL PRIVILEGES ON *.* TO 'aegir_root'@'localhost' IDENTIFIED BY '$AEGIR_ROOT_PASSWORD' WITH GRANT OPTION;" | mysql -u root -p$DB_PASSWORD
 
 	# enable cron tab for hosting service 
 	# Can this script be run before Drupal setup?
