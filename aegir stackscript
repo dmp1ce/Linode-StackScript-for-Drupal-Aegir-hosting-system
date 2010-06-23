@@ -3,6 +3,8 @@
 # <UDF name="aegir_password" Label="MySQL aegir's Password" example="Password for MySQL aegir user" />
 # <UDF name="aegir_root_password" Label="MySQL aegir_root's Password" example="Password for MySQL aegir_root user" />
 # <UDF name="aegir_hostname" Label="Aegir hostname" example="Example aegir.example.com" />
+# <UDF name="aegir_shell" label="Add a shell for the aegir user" oneOf="Yes,No" default="No">
+# <UDF name="setup_acl" label="Setup ACL for Aegir directory" oneOf="Yes,No" default="No">
 
 source <ssinclude StackScriptID="1">
 
@@ -11,7 +13,12 @@ function aegir_install {
 	apt-get -y install apache2 php5 php5-cli php5-mysql mysql-server postfix sudo git-core unzip curl
 	
 	# create aegir user
-	adduser --system --group --home /var/aegir aegir
+        if [ "$AEGIR_SHELL" = "No" ]
+	then 
+	  adduser --system --group --home /var/aegir aegir
+        else
+          adduser --system --shell /bin/bash --group --home /var/aegir aegir
+        fi
 	adduser aegir www-data    #make aegir a user of group www-data
 
 	# link aegir apache.conf into apache2/conf.d directory
@@ -25,7 +32,7 @@ function aegir_install {
 	# Get the aegir setup script and run it
 	cd /tmp
 	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
-	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6'
+	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha7'
 	su -s /bin/sh aegir -c "sh install.sh.txt $AEGIR_HOSTNAME"
 
 	# add aegir user to the sudoers file
@@ -44,6 +51,21 @@ aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 	a2enmod rewrite
 	# mark apache to restart                                                         
         touch /tmp/restart-apache2
+
+	if [ "$SETUP_ACL" = "Yes" ]
+	then 
+		# Using ACL setup guide here: http://www.debianhelp.co.uk/acl.htm
+		apt-get install acl
+		mount -o remount,acl /dev/xvda
+		sed -i'-orig' 's/noatime,errors=remount-ro/acl,noatime,errors=remount-ro/' /etc/fstab
+
+		# add Aegir group ACL permissions
+		setfacl -R -m g:aegir:rwx /var/aegir
+		setfacl -R -m d:g:aegir:rwx /var/aegir
+	else 
+		echo "Skipping ACL setup because of user preference."
+		echo "setup_acl : $SETUP_ACL"
+	fi
 }
 
 system_update
