@@ -26,7 +26,7 @@ function aegir_install {
 	cd /tmp
 	#wget -O install.sh.txt http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha6'
-	su -s /bin/sh aegir -c "sh install.sh.txt -y $AEGIR_HOSTNAME"
+	su -s /bin/sh aegir -c "sh install.sh.txt $AEGIR_HOSTNAME"
 
 	# add aegir user to the sudoers file
 	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
