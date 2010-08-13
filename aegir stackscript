@@ -16,9 +16,12 @@ function aegir_install {
 	ipAddress=$(ifconfig | grep -m 1 'inet addr:' | cut -d: -f2 | awk '{ print $1}');
 	# Insert IP and hostname and domain into /etc/hosts file
 	sed -i '
-/127.0.0.1	localhost.localdomain	localhost/ i\
+/127.0.0.1 localhost/ a\
 '"$ipAddress"'	'"$aegir_hostname"'	'"$aegir_domain"'
-' /etc/hosts	
+' /etc/hosts
+
+  # Set hostname, just because
+  hostname $aegir_hostname
 
 	# create aegir user
         if [ "$AEGIR_SHELL" = "No" ]
@@ -35,7 +38,7 @@ function aegir_install {
 	# Get the aegir setup script and run it
 	cd /tmp
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha11'
-  curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v2-alpha11/automate_install.expect'
+  curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v3-alpha11/automate_install.expect'
 	
   db_password_safe=$(replace_special_shell_characters $db_password)
   su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_HOSTNAME $user_email $db_password_safe"
