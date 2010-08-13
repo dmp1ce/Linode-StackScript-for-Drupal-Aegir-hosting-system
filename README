@@ -1,7 +1,5 @@
 Linode StackScript - Drupal Aegir
 
-Builds an Aegir install according to the instructions here: http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=INSTALL.txt;hb=eb6a25d49f70db0afb8502bd6fce795a3fee5e8a
+Builds an Aegir install according to the instructions here: http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=docs/INSTALL.txt;hb=provision-0.4-alpha11
 
 Also used mig5's video as a reference here: http://www.mig5.net/content/video-installing-aegir-04-alpha5
-
-NOTE: The aegir setup script has a Yes No prompt in it that I did not know how to avoid.  Use the LISH console to monitor this StackScript and press 'y' when prompted.
