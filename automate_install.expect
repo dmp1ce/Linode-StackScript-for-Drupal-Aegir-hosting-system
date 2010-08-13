@@ -17,8 +17,8 @@ spawn sh $script $aegir_hostname --client_email=$email
 # Automate user input
 expect "Do you want to proceed with the install?"
 send "Y\n"
-expect "Enter password:"
-send "$password\n"
+#expect "Enter password:"
+#send "$password\n"
 
 # Give control back to the user
 interact

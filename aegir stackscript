@@ -37,9 +37,10 @@ function aegir_install {
 	
 	# Get the aegir setup script and run it
 	cd /tmp
-	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha11'
-  curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v3-alpha11/automate_install.expect'
-	
+	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha11'  
+  #curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v3-alpha11/automate_install.expect'
+  curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/master/automate_install.expect'
+
   db_password_safe=$(replace_special_shell_characters $DB_PASSWORD)
   su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_HOSTNAME $USER_EMAIL $db_password_safe"
 
