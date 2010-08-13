@@ -53,21 +53,21 @@ aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 	# Get the aegir setup script and run it
 	cd /tmp
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha11'  
-  #curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v3-alpha11/automate_install.expect'
+  #curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/v4-alpha11/automate_install.expect'
   curl -L -o 'automate_install.expect' 'http://github.com/dmp1ce/Linode-StackScript-for-Drupal-Aegir-hosting-system/raw/master/automate_install.expect'
 
+	# enable apache mode rewrite
+	a2enmod rewrite
+	# mark apache to restart
+  touch /tmp/restart-apache2
+
   db_password_safe=$(replace_special_shell_characters $DB_PASSWORD)
-  su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_HOSTNAME $USER_EMAIL $db_password_safe"
+  su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_DOMAIN $USER_EMAIL $db_password_safe"
 
 	# enable cron tab for hosting service 
 	# Can this script be run before Drupal setup?
 	# su -s /bin/sh aegir
 	# php /var/aegir/drush/drush.php --uri=http://aegir.$AEGIR_HOSTNAME.com hosting_setup
-
-	# enable apache mode rewrite
-	a2enmod rewrite
-	# mark apache to restart                                                         
-  touch /tmp/restart-apache2
 
 	if [ "$SETUP_ACL" = "Yes" ]
 	then
