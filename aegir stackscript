@@ -45,7 +45,11 @@ function aegir_install {
 
 	# link aegir apache.conf into apache2/conf.d directory
 	ln -s /var/aegir/config/apache.conf /etc/apache2/conf.d/aegir.conf
-	
+
+	# add aegir user to the sudoers file
+	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
+aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
+
 	# Get the aegir setup script and run it
 	cd /tmp
 	curl -L -o 'install.sh.txt' 'http://git.aegirproject.org/?p=provision.git;a=blob_plain;f=install.sh.txt;hb=provision-0.4-alpha11'  
@@ -54,11 +58,6 @@ function aegir_install {
 
   db_password_safe=$(replace_special_shell_characters $DB_PASSWORD)
   su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_HOSTNAME $USER_EMAIL $db_password_safe"
-  exit # exit out of aegir shell
-
-	# add aegir user to the sudoers file
-	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
-aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 
 	# enable cron tab for hosting service 
 	# Can this script be run before Drupal setup?
