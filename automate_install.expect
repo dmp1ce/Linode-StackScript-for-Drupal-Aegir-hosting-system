@@ -3,7 +3,8 @@
 # Expect script intendend to further automate Linode Aegir StackScipt
 # http://www.linode.com/stackscripts/view/?StackScriptID=203
 
-set timeout 20 # die after 20 seconds
+# die after 20 seconds
+set timeout 20 
 
 # Get arguments
 set script [lindex $argv 0]
@@ -14,10 +15,10 @@ set password [lindex $argv 3]
 # Spawn aegir install script
 spawn sh $script $aegir_hostname --client_email=$email
 # Automate user input
-expect "Please answer yes or no"
-send "Y"
-expect "You will be asked to enter your mysql root user password now :"
-send "$password"
+expect "Do you want to proceed with the install?"
+send "Y\n"
+expect "Enter password:"
+send "$password\n"
 
 # Give control back to the user
 interact
