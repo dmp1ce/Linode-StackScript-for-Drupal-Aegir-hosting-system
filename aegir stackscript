@@ -23,6 +23,17 @@ function aegir_install {
   # Set hostname, just because
   hostname $AEGIR_HOSTNAME
 
+  # Unbind mysql to localhost
+  sed -i '
+/bind-address/ c\
+#bind-address = 127.0.0.1
+' /etc/mysql/my.cnf
+
+  # Restart mysql to clear cache
+  /etc/init.d/mysql restart
+
+  # TODO: setup firewall for extra mySQL security
+
 	# create aegir user
         if [ "$AEGIR_SHELL" = "No" ]
 	then 
@@ -43,6 +54,7 @@ function aegir_install {
 
   db_password_safe=$(replace_special_shell_characters $DB_PASSWORD)
   su -s /bin/sh aegir -c "expect automate_install.expect /tmp/install.sh.txt $AEGIR_HOSTNAME $USER_EMAIL $db_password_safe"
+  exit # exit out of aegir shell
 
 	# add aegir user to the sudoers file
 	sed -i'-orig' '/# %sudo ALL=NOPASSWD: ALL/ a\
@@ -56,7 +68,7 @@ aegir ALL=NOPASSWD: /usr/sbin/apache2ctl' /etc/sudoers
 	# enable apache mode rewrite
 	a2enmod rewrite
 	# mark apache to restart                                                         
-        touch /tmp/restart-apache2
+  touch /tmp/restart-apache2
 
 	if [ "$SETUP_ACL" = "Yes" ]
 	then
